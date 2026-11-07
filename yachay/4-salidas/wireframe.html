@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Yachay organiza planes de tutoría antes de los exámenes.">
+  <title>Yachay — Planifica antes del examen</title>
+  <style>
+    :root {
+      --navy: #132238;
+      --navy-2: #213752;
+      --cream: #f4f0e7;
+      --paper: #fffdf8;
+      --white: #ffffff;
+      --ink: #182638;
+      --muted: #687487;
+      --line: #dedbd2;
+      --gold: #f5c95e;
+      --gold-soft: #fff2c8;
+      --coral: #e86f51;
+      --coral-soft: #ffebe4;
+      --teal: #238a7a;
+      --teal-soft: #e1f3ee;
+      --blue-soft: #e7eef7;
+      --shadow: 0 18px 50px rgba(19, 34, 56, .10);
+      --radius: 22px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--cream); }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible { outline: 3px solid rgba(232,111,81,.28); outline-offset: 2px; }
+    .hidden { display: none !important; }
+
+    .app { min-height: 100vh; display: grid; grid-template-columns: 238px minmax(0, 1fr); }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; z-index: 20;
+      display: flex; flex-direction: column; padding: 28px 20px;
+      color: var(--white); background: var(--navy);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px; font-size: 23px; font-weight: 900; letter-spacing: -.8px; }
+    .brand-mark { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 11px; color: var(--navy); background: var(--gold); }
+    .sidebar-label { margin: 42px 10px 10px; color: #8fa1b7; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .nav { display: grid; gap: 7px; }
+    .nav-button {
+      display: flex; align-items: center; gap: 11px; width: 100%; padding: 12px 13px;
+      border: 0; border-radius: 12px; color: #bac6d4; background: transparent; text-align: left; font-weight: 700;
+    }
+    .nav-button:hover, .nav-button.active { color: var(--white); background: var(--navy-2); }
+    .nav-icon { width: 23px; color: var(--gold); text-align: center; }
+    .sidebar-spacer { flex: 1; }
+    .demo-stamp { margin: 16px 5px 0; padding: 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; color: #9fadc0; font-size: 11px; line-height: 1.45; }
+    .demo-stamp b { display: block; margin-bottom: 4px; color: var(--gold); font-size: 12px; }
+
+    .mobile-bar { display: none; }
+    .main { min-width: 0; padding: 32px clamp(22px, 4vw, 58px) 70px; }
+    .view { display: none; max-width: 1240px; margin: 0 auto; animation: enter .28s ease; }
+    .view.active { display: block; }
+    @keyframes enter { from { opacity: .3; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+    .page-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+    .kicker { margin: 0 0 8px; color: var(--coral); font-size: 11px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0; max-width: 770px; font-size: clamp(32px, 4vw, 52px); line-height: 1.04; letter-spacing: -2px; }
+    h2 { margin: 0; font-size: 23px; line-height: 1.15; letter-spacing: -.7px; }
+    h3 { margin: 0; font-size: 16px; line-height: 1.25; }
+    p { margin: 0; }
+    .subhead { max-width: 690px; margin-top: 12px; color: var(--muted); font-size: 16px; line-height: 1.55; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 8px 11px 8px 8px; border: 1px solid var(--line); border-radius: 99px; background: var(--paper); white-space: nowrap; }
+    .avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--white); background: var(--coral); font-size: 12px; font-weight: 900; }
+    .profile b { display: block; font-size: 12px; }
+    .profile span { color: var(--muted); font-size: 10px; }
+
+    .context-strip {
+      display: grid; grid-template-columns: 1.25fr .75fr .75fr; gap: 1px; overflow: hidden;
+      margin-bottom: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--line);
+    }
+    .context-item { padding: 17px 20px; background: var(--paper); }
+    .context-item span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .context-item strong { font-size: 15px; }
+    .context-item.accent { color: var(--white); background: var(--teal); }
+    .context-item.accent span { color: rgba(255,255,255,.72); }
+
+    .builder { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 22px; align-items: start; }
+    .workspace { display: grid; gap: 18px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: 0 3px 0 rgba(19,34,56,.02); }
+    .card-pad { padding: 23px; }
+    .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+    .step { display: grid; place-items: center; flex: 0 0 27px; width: 27px; height: 27px; border-radius: 9px; color: var(--navy); background: var(--gold); font-size: 12px; font-weight: 900; }
+    .title-row { display: flex; gap: 11px; align-items: flex-start; }
+    .helper { margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .text-button { border: 0; color: var(--coral); background: transparent; font-weight: 800; }
+
+    .course-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; }
+    .course-card { min-width: 0; padding: 13px 10px; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); background: var(--white); text-align: left; transition: .17s ease; }
+    .course-card:hover { transform: translateY(-2px); border-color: #aab4c0; }
+    .course-card.selected { color: var(--white); border-color: var(--navy); background: var(--navy); box-shadow: 0 8px 18px rgba(19,34,56,.16); }
+    .course-symbol { display: block; margin-bottom: 15px; color: var(--coral); font-size: 22px; font-weight: 900; }
+    .course-card.selected .course-symbol { color: var(--gold); }
+    .course-card b { display: block; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .course-card small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+    .course-card.selected small { color: #aebdd0; }
+
+    .choice-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+    .choice {
+      position: relative; padding: 17px; border: 1px solid var(--line); border-radius: 15px;
+      color: var(--ink); background: var(--white); text-align: left;
+    }
+    .choice.selected { border-color: var(--coral); box-shadow: inset 0 0 0 1px var(--coral); }
+    .choice.selected::after { content: "✓"; position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; color: var(--white); background: var(--coral); font-weight: 900; }
+    .choice-tag { display: inline-block; margin-bottom: 12px; padding: 5px 7px; border-radius: 7px; color: var(--navy); background: var(--gold-soft); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+    .choice p { margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .mode-switch { display: flex; gap: 7px; padding: 5px; border-radius: 13px; background: var(--blue-soft); }
+    .mode-button { flex: 1; padding: 10px 12px; border: 0; border-radius: 10px; color: var(--muted); background: transparent; font-size: 13px; font-weight: 800; }
+    .mode-button.selected { color: var(--white); background: var(--navy); box-shadow: 0 5px 12px rgba(19,34,56,.15); }
+
+    .availability-card { overflow: hidden; }
+    .availability-top { display: flex; justify-content: space-between; gap: 16px; padding: 21px 23px; color: var(--white); background: var(--navy); }
+    .availability-top p { margin-top: 5px; color: #afbdcd; font-size: 13px; }
+    .session-counter { align-self: center; padding: 8px 11px; border-radius: 10px; color: var(--navy); background: var(--gold); font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .date-groups { display: grid; gap: 14px; padding: 20px 23px 23px; }
+    .date-group { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 14px; align-items: start; }
+    .date-label { padding-top: 8px; }
+    .date-label b { display: block; font-size: 13px; }
+    .date-label span { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .slot-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .slot {
+      position: relative; min-width: 0; padding: 13px; border: 1px solid var(--line); border-radius: 13px;
+      color: var(--ink); background: var(--white); text-align: left; transition: .16s ease;
+    }
+    .slot:hover { border-color: var(--teal); transform: translateY(-1px); }
+    .slot.selected { color: var(--white); border-color: var(--teal); background: var(--teal); }
+    .slot-time { display: block; font-size: 13px; font-weight: 900; }
+    .slot-meta { display: flex; justify-content: space-between; gap: 6px; margin-top: 8px; color: var(--muted); font-size: 10px; }
+    .slot.selected .slot-meta { color: rgba(255,255,255,.76); }
+    .discount-label { color: var(--coral); font-weight: 900; }
+    .slot.selected .discount-label { color: var(--gold); }
+    .slot-check { position: absolute; top: 10px; right: 10px; display: none; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: var(--teal); background: var(--white); font-size: 11px; font-weight: 900; }
+    .slot.selected .slot-check { display: grid; }
+    .availability-foot { display: flex; align-items: center; gap: 9px; padding: 12px 23px; border-top: 1px solid var(--line); color: var(--muted); background: #faf8f2; font-size: 11px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral); }
+
+    .route { padding: 20px 23px; }
+    .route-list { display: grid; gap: 9px; margin-top: 15px; }
+    .route-empty { padding: 17px; border: 1px dashed #b9c1c9; border-radius: 13px; color: var(--muted); font-size: 12px; text-align: center; }
+    .route-item { display: grid; grid-template-columns: 31px minmax(0, 1fr) auto; gap: 11px; align-items: center; padding: 12px; border-radius: 13px; background: var(--blue-soft); }
+    .route-num { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 9px; color: var(--white); background: var(--navy); font-size: 11px; font-weight: 900; }
+    .route-copy b { display: block; font-size: 12px; }
+    .route-copy span { color: var(--muted); font-size: 10px; }
+    .route-price { color: var(--teal); font-size: 12px; font-weight: 900; }
+
+    .summary { position: sticky; top: 22px; overflow: hidden; box-shadow: var(--shadow); }
+    .summary-head { padding: 22px; color: var(--white); background: linear-gradient(140deg, var(--coral), #d8563c); }
+    .summary-head .kicker { color: var(--gold-soft); }
+    .summary-head p { margin-top: 7px; color: rgba(255,255,255,.8); font-size: 12px; line-height: 1.45; }
+    .summary-body { padding: 19px 21px 22px; }
+    .summary-status { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+    .summary-status span { color: var(--muted); font-size: 11px; }
+    .summary-status b { font-size: 11px; }
+    .progress { height: 7px; overflow: hidden; margin-bottom: 18px; border-radius: 9px; background: var(--blue-soft); }
+    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: var(--teal); transition: width .25s ease; }
+    .summary-detail { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .summary-detail span { color: var(--muted); }
+    .summary-detail b { max-width: 170px; text-align: right; }
+    .cost-lines { margin: 15px 0 12px; }
+    .cost-line { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; color: var(--muted); font-size: 11px; }
+    .cost-line.saving { color: var(--teal); font-weight: 800; }
+    .total { display: flex; justify-content: space-between; align-items: end; margin-top: 13px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .total span { color: var(--muted); font-size: 11px; }
+    .total strong { font-size: 28px; letter-spacing: -1.2px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 11px 15px; border: 1px solid transparent; border-radius: 11px; font-weight: 850; transition: .16s ease; }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .btn:disabled { cursor: not-allowed; opacity: .45; }
+    .btn-primary { color: var(--white); background: var(--navy); }
+    .btn-coral { color: var(--white); background: var(--coral); }
+    .btn-soft { color: var(--navy); background: var(--blue-soft); }
+    .btn-outline { color: var(--navy); border-color: #b8c0ca; background: var(--white); }
+    .btn-wide { width: 100%; margin-top: 16px; }
+    .summary-note { margin-top: 11px; color: var(--muted); font-size: 10px; line-height: 1.45; text-align: center; }
+
+    .groups-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+    .select-wrap { display: flex; align-items: center; gap: 9px; }
+    select { padding: 11px 35px 11px 12px; border: 1px solid var(--line); border-radius: 11px; color: var(--ink); background: var(--paper); }
+    .groups-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .group-card { overflow: hidden; }
+    .group-color { height: 7px; background: var(--teal); }
+    .group-body { padding: 20px; }
+    .group-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .group-symbol { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 15px; border-radius: 12px; color: var(--navy); background: var(--gold); font-size: 19px; font-weight: 900; }
+    .group-price { color: var(--teal); font-size: 18px; font-weight: 900; }
+    .group-price small { display: block; color: var(--muted); font-size: 9px; font-weight: 700; text-align: right; }
+    .group-sessions { display: grid; gap: 7px; margin: 16px 0; }
+    .group-session { display: flex; justify-content: space-between; gap: 10px; padding: 10px; border-radius: 10px; background: var(--blue-soft); font-size: 11px; }
+    .seat-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 15px; border-top: 1px solid var(--line); }
+    .people { display: flex; align-items: center; }
+    .person { display: grid; place-items: center; width: 29px; height: 29px; margin-left: -6px; border: 2px solid var(--paper); border-radius: 50%; color: var(--white); background: var(--navy-2); font-size: 9px; font-weight: 900; }
+    .person:first-child { margin-left: 0; }
+    .person.empty { color: var(--muted); background: var(--blue-soft); }
+    .seat-copy { margin-left: 9px; color: var(--muted); font-size: 10px; }
+
+    .tutor-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 20px; align-items: start; }
+    .heat-card { overflow: hidden; }
+    .heat-top { display: flex; justify-content: space-between; gap: 16px; padding: 22px; color: var(--white); background: var(--navy); }
+    .heat-top p { margin-top: 5px; color: #abb9ca; font-size: 12px; }
+    .heat-wrap { overflow-x: auto; padding: 21px; }
+    .heatmap { display: grid; grid-template-columns: 64px repeat(6, minmax(72px, 1fr)); gap: 7px; min-width: 620px; }
+    .heat-day { padding: 6px; color: var(--muted); font-size: 10px; font-weight: 900; text-align: center; text-transform: uppercase; }
+    .heat-hour { display: grid; align-items: center; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .heat-cell { position: relative; height: 47px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); }
+    .heat-cell.marked { border-color: var(--teal); background: var(--teal-soft); }
+    .heat-cell.peak::after { content: "demanda"; position: absolute; right: 4px; bottom: 3px; color: var(--coral); font-size: 7px; font-weight: 900; text-transform: uppercase; }
+    .heat-cell.marked::before { content: "✓"; position: absolute; top: 6px; left: 8px; color: var(--teal); font-weight: 900; }
+    .commitment-bar { display: flex; align-items: center; gap: 9px; padding: 13px 21px; border-top: 1px solid var(--line); color: #315a53; background: var(--teal-soft); font-size: 11px; }
+    .tutor-side { display: grid; gap: 14px; }
+    .metric-card { padding: 19px; }
+    .metric-value { margin-top: 10px; font-size: 31px; font-weight: 950; letter-spacing: -1.3px; }
+    .metric-value small { font-size: 12px; letter-spacing: 0; }
+    .metric-card p { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .assignment-card { padding: 21px; color: var(--white); background: var(--navy); }
+    .assignment-card .kicker { color: var(--gold); }
+    .assignment-card p { margin-top: 10px; color: #acbacb; font-size: 12px; line-height: 1.5; }
+    .rules { display: grid; gap: 9px; margin-top: 17px; }
+    .rule { display: flex; gap: 9px; font-size: 11px; line-height: 1.4; }
+    .rule-num { display: grid; place-items: center; flex: 0 0 22px; width: 22px; height: 22px; border-radius: 7px; color: var(--navy); background: var(--gold); font-size: 9px; font-weight: 900; }
+
+    .modal-backdrop { position: fixed; inset: 0; z-index: 60; display: none; place-items: center; padding: 20px; background: rgba(10,22,38,.62); backdrop-filter: blur(5px); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(480px, 100%); padding: 28px; border-radius: 24px; background: var(--paper); box-shadow: 0 30px 80px rgba(0,0,0,.28); animation: enter .23s ease; }
+    .modal-mark { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 17px; border-radius: 15px; color: var(--navy); background: var(--gold); font-size: 22px; font-weight: 900; }
+    .modal p { margin-top: 9px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .modal-summary { margin: 18px 0; padding: 15px; border-radius: 13px; background: var(--blue-soft); font-size: 12px; line-height: 1.6; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 80; display: none; padding: 13px 16px; border-radius: 12px; color: var(--white); background: var(--navy); box-shadow: var(--shadow); font-size: 12px; font-weight: 800; }
+    .toast.show { display: block; animation: enter .2s ease; }
+
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 82px minmax(0, 1fr); }
+      .sidebar { padding: 24px 13px; }
+      .brand span:last-child, .nav-button span:last-child, .sidebar-label, .demo-stamp { display: none; }
+      .brand { justify-content: center; padding: 0; }
+      .nav-button { justify-content: center; padding: 13px 0; }
+      .nav-icon { width: auto; }
+      .builder, .tutor-layout { grid-template-columns: 1fr; }
+      .summary { position: static; }
+      .course-grid { grid-template-columns: repeat(3, 1fr); }
+      .tutor-side { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app { display: block; }
+      .sidebar { display: none; }
+      .mobile-bar {
+        position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; color: var(--white); background: var(--navy);
+      }
+      .mobile-nav { display: flex; gap: 4px; }
+      .mobile-nav button { padding: 8px 9px; border: 0; border-radius: 8px; color: #b8c6d5; background: transparent; font-size: 10px; font-weight: 800; }
+      .mobile-nav button.active { color: var(--navy); background: var(--gold); }
+      .main { padding: 25px 15px 50px; }
+      .profile { display: none; }
+      .page-top { margin-bottom: 20px; }
+      .context-strip { grid-template-columns: 1fr; }
+      .course-grid { grid-template-columns: repeat(2, 1fr); }
+      .choice-row, .groups-grid, .tutor-side { grid-template-columns: 1fr; }
+      .date-group { grid-template-columns: 1fr; gap: 8px; }
+      .date-label { display: flex; justify-content: space-between; padding: 0; }
+      .slot-list { grid-template-columns: 1fr; }
+      .availability-top { display: block; }
+      .session-counter { display: inline-block; margin-top: 12px; }
+      .groups-toolbar { align-items: stretch; flex-direction: column; }
+      .select-wrap { justify-content: space-between; }
+      .select-wrap select { flex: 1; }
+      .modal-actions { flex-direction: column-reverse; }
+      .modal-actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">Y</span><span>yachay</span></div>
+      <div class="sidebar-label">Espacio del alumno</div>
+      <nav class="nav" aria-label="Navegación">
+        <button class="nav-button active" data-view="plan"><span class="nav-icon">◫</span><span>Mi plan</span></button>
+        <button class="nav-button" data-view="groups"><span class="nav-icon">◉</span><span>Grupos</span></button>
+        <button class="nav-button" data-view="tutor"><span class="nav-icon">⌁</span><span>Disponibilidad</span></button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="demo-stamp"><b>Caso ficticio</b>Escenario interactivo para el pitch de Yachay.</div>
+    </aside>
+
+    <header class="mobile-bar">
+      <div class="brand"><span class="brand-mark">Y</span><span>yachay</span></div>
+      <nav class="mobile-nav">
+        <button class="active" data-view="plan">Plan</button>
+        <button data-view="groups">Grupos</button>
+        <button data-view="tutor">Tutor</button>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section class="view active" id="view-plan">
+        <div class="page-top">
+          <div>
+            <p class="kicker">Tu ruta antes del examen</p>
+            <h1>Arma un plan que llegue antes que el apuro.</h1>
+            <p class="subhead">Elige el curso, completa tus sesiones y aprovecha horarios con disponibilidad real.</p>
+          </div>
+          <div class="profile"><div class="avatar">VM</div><div><b>Valeria M.</b><span>Primer año</span></div></div>
+        </div>
+
+        <div class="context-strip">
+          <div class="context-item accent"><span>Curso seleccionado</span><strong id="context-course">Matemática I</strong></div>
+          <div class="context-item"><span>Examen</span><strong id="context-exam">Lun 21 oct</strong></div>
+          <div class="context-item"><span>Ruta</span><strong id="context-route">2 sesiones</strong></div>
+        </div>
+
+        <div class="builder">
+          <div class="workspace">
+            <article class="card card-pad">
+              <div class="card-head">
+                <div class="title-row"><span class="step">1</span><div><h2>¿Qué curso estás preparando?</h2><p class="helper">Cada curso tiene fechas y tutores distintos.</p></div></div>
+              </div>
+              <div class="course-grid" id="course-grid"></div>
+            </article>
+
+            <article class="card card-pad">
+              <div class="card-head">
+                <div class="title-row"><span class="step">2</span><div><h2>Elige el ritmo de tu plan</h2><p class="helper">Más sesiones te permiten distribuir mejor la preparación.</p></div></div>
+              </div>
+              <div class="choice-row">
+                <button class="choice selected" data-plan="focus"><span class="choice-tag">2 sesiones</span><h3>Plan Enfoque</h3><p>Dos momentos concretos para ordenar dudas y practicar.</p></button>
+                <button class="choice" data-plan="prep"><span class="choice-tag">3 sesiones</span><h3>Plan Preparación</h3><p>Una ruta más completa antes de llegar al examen.</p></button>
+              </div>
+              <div style="height:13px"></div>
+              <div class="mode-switch" aria-label="Modalidad">
+                <button class="mode-button selected" data-mode="individual">Individual</button>
+                <button class="mode-button" data-mode="group">Grupal</button>
+              </div>
+            </article>
+
+            <article class="card availability-card">
+              <div class="availability-top">
+                <div><p class="kicker" style="color:var(--gold)">Paso 3</p><h2 id="availability-title">Horarios para Matemática I</h2><p id="availability-copy">Selecciona 2 horarios distintos antes del examen.</p></div>
+                <div class="session-counter" id="session-counter">0 de 2 elegidas</div>
+              </div>
+              <div class="date-groups" id="date-groups"></div>
+              <div class="availability-foot"><span class="legend-dot"></span><span>Plan Adelántate aparece solo en horarios tempranos con baja ocupación.</span></div>
+            </article>
+
+            <article class="card route">
+              <div class="card-head" style="margin-bottom:0">
+                <div><p class="kicker">Tu calendario</p><h2>Ruta de estudio</h2></div>
+                <button class="text-button" id="clear-route">Limpiar</button>
+              </div>
+              <div class="route-list" id="route-list"></div>
+            </article>
+          </div>
+
+          <aside class="card summary">
+            <div class="summary-head">
+              <p class="kicker">Resumen del plan</p>
+              <h2 id="summary-plan">Plan Enfoque</h2>
+              <p id="summary-description">Matemática I · modalidad individual</p>
+            </div>
+            <div class="summary-body">
+              <div class="summary-status"><span>Sesiones elegidas</span><b id="summary-count">0 de 2</b></div>
+              <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+              <div class="summary-detail"><span>Examen</span><b id="summary-exam">Lun 21 oct</b></div>
+              <div class="summary-detail"><span>Asignación</span><b>Automática y equitativa</b></div>
+              <div class="cost-lines" id="cost-lines"></div>
+              <div class="total"><span>Total del plan</span><strong id="total-price">S/ 0</strong></div>
+              <button class="btn btn-primary btn-wide" id="continue-payment" disabled>Elige 2 horarios</button>
+              <p class="summary-note">El tutor se asigna después de confirmar el pago.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-groups">
+        <div class="page-top">
+          <div><p class="kicker">Grupos en formación</p><h1>Encuentra compañeros que ya empezaron.</h1><p class="subhead">Cada grupo muestra toda su ruta, sus cupos y el precio antes de unirte.</p></div>
+          <div class="profile"><div class="avatar">VM</div><div><b>Valeria M.</b><span>Primer año</span></div></div>
+        </div>
+        <div class="groups-toolbar">
+          <div class="select-wrap"><label for="group-filter"><b>Ver grupos de</b></label><select id="group-filter"></select></div>
+          <button class="btn btn-coral" id="propose-group">+ Proponer otro turno</button>
+        </div>
+        <div class="groups-grid" id="groups-grid"></div>
+      </section>
+
+      <section class="view" id="view-tutor">
+        <div class="page-top">
+          <div><p class="kicker">Espacio del tutor</p><h1>Marca las horas con las que sí te puedes comprometer.</h1><p class="subhead">Los alumnos solo verán disponibilidad cuando exista un tutor libre en ese horario.</p></div>
+          <div class="profile"><div class="avatar" style="background:var(--teal)">LC</div><div><b>Luis C.</b><span>Tutor activo</span></div></div>
+        </div>
+        <div class="groups-toolbar">
+          <div class="select-wrap"><label for="tutor-course"><b>Disponibilidad para</b></label><select id="tutor-course"></select></div>
+        </div>
+        <div class="tutor-layout">
+          <article class="card heat-card">
+            <div class="heat-top"><div><p class="kicker" style="color:var(--gold)">Semana típica</p><h2 id="heat-title">Matemática I</h2><p>Haz clic para marcar o liberar una hora.</p></div></div>
+            <div class="heat-wrap"><div class="heatmap" id="heatmap"></div></div>
+            <div class="commitment-bar"><b>✓ Compromiso:</b><span>si una hora está marcada, el sistema puede asignarte una sesión.</span></div>
+          </article>
+          <aside class="tutor-side">
+            <article class="card metric-card"><p class="kicker">Esta semana</p><div class="metric-value"><span id="marked-hours">0</span> <small>horas libres</small></div><p>Tu disponibilidad puede recibir asignaciones del curso seleccionado.</p></article>
+            <article class="card assignment-card"><p class="kicker">Cómo se asigna</p><h2>No gana quien responde primero.</h2><p>El sistema filtra por curso y horario, luego reparte la demanda entre quienes tienen menor carga.</p><div class="rules"><div class="rule"><span class="rule-num">1</span><span>Curso compatible</span></div><div class="rule"><span class="rule-num">2</span><span>Hora marcada como libre</span></div><div class="rule"><span class="rule-num">3</span><span>Menor carga de sesiones</span></div></div></article>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-mark">Y</div>
+      <h2 id="modal-title">Tu plan está listo</h2>
+      <p id="modal-copy"></p>
+      <div class="modal-summary" id="modal-summary"></div>
+      <div class="modal-actions"><button class="btn btn-outline" id="modal-close">Volver</button><button class="btn btn-primary" id="modal-action">Continuar al pago</button></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      var courses = {
+        math: {
+          name: 'Matemática I', short: 'Matemática', symbol: '∑', exam: 'Lun 21 oct',
+          slots: [
+            { id:'m1', date:'Mar 8 oct', day:'Martes', time:'5:00 p. m.', tutors:6, discount:true },
+            { id:'m2', date:'Mar 8 oct', day:'Martes', time:'7:00 p. m.', tutors:3, discount:true },
+            { id:'m3', date:'Jue 10 oct', day:'Jueves', time:'4:00 p. m.', tutors:4, discount:true },
+            { id:'m4', date:'Sáb 12 oct', day:'Sábado', time:'10:00 a. m.', tutors:2, discount:true },
+            { id:'m5', date:'Lun 14 oct', day:'Lunes', time:'6:00 p. m.', tutors:2, discount:false },
+            { id:'m6', date:'Jue 17 oct', day:'Jueves', time:'7:00 p. m.', tutors:1, discount:false }
+          ]
+        },
+        stats: {
+          name: 'Estadística', short: 'Estadística', symbol: '%', exam: 'Mar 22 oct',
+          slots: [
+            { id:'s1', date:'Mié 9 oct', day:'Miércoles', time:'3:00 p. m.', tutors:5, discount:true },
+            { id:'s2', date:'Vie 11 oct', day:'Viernes', time:'5:00 p. m.', tutors:4, discount:true },
+            { id:'s3', date:'Sáb 12 oct', day:'Sábado', time:'9:00 a. m.', tutors:3, discount:true },
+            { id:'s4', date:'Mar 15 oct', day:'Martes', time:'7:00 p. m.', tutors:2, discount:false },
+            { id:'s5', date:'Jue 17 oct', day:'Jueves', time:'6:00 p. m.', tutors:2, discount:false },
+            { id:'s6', date:'Dom 20 oct', day:'Domingo', time:'4:00 p. m.', tutors:1, discount:false }
+          ]
+        },
+        accounting: {
+          name: 'Contabilidad', short: 'Contabilidad', symbol: 'C', exam: 'Mar 22 oct',
+          slots: [
+            { id:'c1', date:'Lun 7 oct', day:'Lunes', time:'4:00 p. m.', tutors:4, discount:true },
+            { id:'c2', date:'Jue 10 oct', day:'Jueves', time:'6:00 p. m.', tutors:5, discount:true },
+            { id:'c3', date:'Sáb 12 oct', day:'Sábado', time:'11:00 a. m.', tutors:3, discount:true },
+            { id:'c4', date:'Mié 16 oct', day:'Miércoles', time:'5:00 p. m.', tutors:2, discount:false },
+            { id:'c5', date:'Vie 18 oct', day:'Viernes', time:'7:00 p. m.', tutors:1, discount:false }
+          ]
+        },
+        micro: {
+          name: 'Microeconomía', short: 'Micro', symbol: '↗', exam: 'Mié 23 oct',
+          slots: [
+            { id:'e1', date:'Mar 8 oct', day:'Martes', time:'4:00 p. m.', tutors:3, discount:true },
+            { id:'e2', date:'Vie 11 oct', day:'Viernes', time:'6:00 p. m.', tutors:4, discount:true },
+            { id:'e3', date:'Dom 13 oct', day:'Domingo', time:'10:00 a. m.', tutors:2, discount:true },
+            { id:'e4', date:'Mié 16 oct', day:'Miércoles', time:'7:00 p. m.', tutors:2, discount:false },
+            { id:'e5', date:'Sáb 19 oct', day:'Sábado', time:'3:00 p. m.', tutors:1, discount:false }
+          ]
+        },
+        finance: {
+          name: 'Finanzas', short: 'Finanzas', symbol: 'S/', exam: 'Jue 24 oct',
+          slots: [
+            { id:'f1', date:'Mié 9 oct', day:'Miércoles', time:'5:00 p. m.', tutors:4, discount:true },
+            { id:'f2', date:'Sáb 12 oct', day:'Sábado', time:'9:00 a. m.', tutors:3, discount:true },
+            { id:'f3', date:'Lun 14 oct', day:'Lunes', time:'4:00 p. m.', tutors:3, discount:true },
+            { id:'f4', date:'Jue 17 oct', day:'Jueves', time:'7:00 p. m.', tutors:2, discount:false },
+            { id:'f5', date:'Lun 21 oct', day:'Lunes', time:'6:00 p. m.', tutors:1, discount:false }
+          ]
+        }
+      };
+
+      var groups = [
+        { id:'g1', course:'math', plan:'Plan Enfoque', slots:['m1','m3'], joined:3, initials:['JR','NP','AC'] },
+        { id:'g2', course:'math', plan:'Plan Enfoque', slots:['m2','m4'], joined:2, initials:['LM','DR'] },
+        { id:'g3', course:'stats', plan:'Plan Enfoque', slots:['s1','s3'], joined:3, initials:['MF','PG','AS'] },
+        { id:'g4', course:'stats', plan:'Plan Enfoque', slots:['s2','s4'], joined:1, initials:['CM'] },
+        { id:'g5', course:'accounting', plan:'Plan Enfoque', slots:['c1','c3'], joined:2, initials:['RL','VG'] },
+        { id:'g6', course:'micro', plan:'Plan Enfoque', slots:['e1','e2'], joined:3, initials:['EC','AV','TM'] },
+        { id:'g7', course:'finance', plan:'Plan Enfoque', slots:['f1','f3'], joined:2, initials:['JF','SB'] }
+      ];
+
+      var heatState = {};
+      Object.keys(courses).forEach(function (key, courseIndex) {
+        heatState[key] = [];
+        for (var i = 0; i < 24; i += 1) {
+          heatState[key].push({ marked: ((i + courseIndex) % 4 === 0 || (i + courseIndex) % 7 === 0), peak: i >= 12 && i <= 20 });
+        }
+      });
+
+      var state = { course:'math', plan:'focus', mode:'individual', selected:[] };
+      var plans = {
+        focus: { name:'Plan Enfoque', sessions:2 },
+        prep: { name:'Plan Preparación', sessions:3 }
+      };
+
+      var courseGrid = document.getElementById('course-grid');
+      var dateGroups = document.getElementById('date-groups');
+      var routeList = document.getElementById('route-list');
+      var groupsGrid = document.getElementById('groups-grid');
+      var groupFilter = document.getElementById('group-filter');
+      var tutorCourse = document.getElementById('tutor-course');
+      var modal = document.getElementById('modal');
+      var toast = document.getElementById('toast');
+
+      function money(value) { return 'S/ ' + value; }
+      function neededSessions() { return plans[state.plan].sessions; }
+      function slotPrice(slot) {
+        if (state.mode === 'individual') return slot.discount ? 35 : 40;
+        return slot.discount ? 25 : 28;
+      }
+      function regularPrice() { return state.mode === 'individual' ? 40 : 28; }
+      function selectedSlots() {
+        return state.selected.map(function (id) { return courses[state.course].slots.find(function (slot) { return slot.id === id; }); }).filter(Boolean);
+      }
+      function showToast(message) {
+        toast.textContent = message; toast.classList.add('show');
+        window.setTimeout(function () { toast.classList.remove('show'); }, 1900);
+      }
+      function switchView(view) {
+        document.querySelectorAll('.view').forEach(function (element) { element.classList.toggle('active', element.id === 'view-' + view); });
+        document.querySelectorAll('[data-view]').forEach(function (button) { button.classList.toggle('active', button.dataset.view === view); });
+        if (view === 'groups') renderGroups();
+        if (view === 'tutor') renderHeatmap();
+        window.scrollTo({ top:0, behavior:'smooth' });
+      }
+
+      function renderCourseControls() {
+        courseGrid.innerHTML = '';
+        groupFilter.innerHTML = '';
+        tutorCourse.innerHTML = '';
+        Object.keys(courses).forEach(function (key) {
+          var course = courses[key];
+          var button = document.createElement('button');
+          button.className = 'course-card' + (key === state.course ? ' selected' : '');
+          button.dataset.course = key;
+          button.innerHTML = '<span class="course-symbol">' + course.symbol + '</span><b>' + course.short + '</b><small>Examen · ' + course.exam + '</small>';
+          courseGrid.appendChild(button);
+          var optionA = document.createElement('option'); optionA.value = key; optionA.textContent = course.name; groupFilter.appendChild(optionA);
+          var optionB = document.createElement('option'); optionB.value = key; optionB.textContent = course.name; tutorCourse.appendChild(optionB);
+        });
+        groupFilter.value = state.course;
+        tutorCourse.value = state.course;
+      }
+
+      function renderAvailability() {
+        var course = courses[state.course];
+        var grouped = {};
+        course.slots.forEach(function (slot) {
+          if (!grouped[slot.date]) grouped[slot.date] = [];
+          grouped[slot.date].push(slot);
+        });
+        dateGroups.innerHTML = '';
+        Object.keys(grouped).forEach(function (date) {
+          var slots = grouped[date];
+          var row = document.createElement('div'); row.className = 'date-group';
+          var label = document.createElement('div'); label.className = 'date-label';
+          label.innerHTML = '<b>' + date + '</b><span>' + slots[0].day + '</span>';
+          var list = document.createElement('div'); list.className = 'slot-list';
+          slots.forEach(function (slot) {
+            var selected = state.selected.indexOf(slot.id) >= 0;
+            var button = document.createElement('button');
+            button.className = 'slot' + (selected ? ' selected' : '');
+            button.dataset.slot = slot.id;
+            button.innerHTML = '<span class="slot-check">✓</span><span class="slot-time">' + slot.time + '</span><span class="slot-meta"><span>' + slot.tutors + ' tutores</span><span class="' + (slot.discount ? 'discount-label' : '') + '">' + (slot.discount ? 'Adelántate · ' : '') + money(slotPrice(slot)) + '</span></span>';
+            list.appendChild(button);
+          });
+          row.appendChild(label); row.appendChild(list); dateGroups.appendChild(row);
+        });
+        document.getElementById('availability-title').textContent = 'Horarios para ' + course.name;
+        document.getElementById('availability-copy').textContent = 'Selecciona ' + neededSessions() + ' horarios distintos antes del examen.';
+        document.getElementById('session-counter').textContent = state.selected.length + ' de ' + neededSessions() + ' elegidas';
+      }
+
+      function renderRoute() {
+        var slots = selectedSlots();
+        routeList.innerHTML = '';
+        if (!slots.length) {
+          routeList.innerHTML = '<div class="route-empty">Tu ruta aparecerá aquí cuando elijas el primer horario.</div>';
+          return;
+        }
+        slots.forEach(function (slot, index) {
+          var item = document.createElement('div'); item.className = 'route-item';
+          item.innerHTML = '<span class="route-num">' + (index + 1) + '</span><div class="route-copy"><b>' + slot.date + ' · ' + slot.time + '</b><span>' + (slot.discount ? 'Horario Plan Adelántate' : 'Horario regular') + '</span></div><span class="route-price">' + money(slotPrice(slot)) + '</span>';
+          routeList.appendChild(item);
+        });
+      }
+
+      function renderSummary() {
+        var course = courses[state.course];
+        var plan = plans[state.plan];
+        var slots = selectedSlots();
+        var total = slots.reduce(function (sum, slot) { return sum + slotPrice(slot); }, 0);
+        var regularTotal = slots.length * regularPrice();
+        var saving = regularTotal - total;
+        document.getElementById('context-course').textContent = course.name;
+        document.getElementById('context-exam').textContent = course.exam;
+        document.getElementById('context-route').textContent = plan.sessions + ' sesiones';
+        document.getElementById('summary-plan').textContent = plan.name;
+        document.getElementById('summary-description').textContent = course.name + ' · modalidad ' + (state.mode === 'individual' ? 'individual' : 'grupal');
+        document.getElementById('summary-count').textContent = slots.length + ' de ' + plan.sessions;
+        document.getElementById('summary-exam').textContent = course.exam;
+        document.getElementById('progress-fill').style.width = Math.min(100, slots.length / plan.sessions * 100) + '%';
+        document.getElementById('total-price').textContent = money(total);
+        var lines = document.getElementById('cost-lines'); lines.innerHTML = '';
+        slots.forEach(function (slot, index) {
+          var line = document.createElement('div'); line.className = 'cost-line';
+          line.innerHTML = '<span>Sesión ' + (index + 1) + (slot.discount ? ' · Adelántate' : '') + '</span><b>' + money(slotPrice(slot)) + '</b>';
+          lines.appendChild(line);
+        });
+        if (!slots.length) lines.innerHTML = '<div class="cost-line"><span>Aún no elegiste horarios</span><b>—</b></div>';
+        if (saving > 0) {
+          var savingLine = document.createElement('div'); savingLine.className = 'cost-line saving';
+          savingLine.innerHTML = '<span>Ahorro del plan</span><b>− ' + money(saving) + '</b>'; lines.appendChild(savingLine);
+        }
+        var button = document.getElementById('continue-payment');
+        var complete = slots.length === plan.sessions;
+        button.disabled = !complete;
+        button.textContent = complete ? 'Continuar al pago · ' + money(total) : 'Elige ' + (plan.sessions - slots.length) + ' horario' + ((plan.sessions - slots.length) === 1 ? '' : 's');
+      }
+
+      function renderAll() {
+        renderCourseControls();
+        document.querySelectorAll('[data-plan]').forEach(function (button) { button.classList.toggle('selected', button.dataset.plan === state.plan); });
+        document.querySelectorAll('[data-mode]').forEach(function (button) { button.classList.toggle('selected', button.dataset.mode === state.mode); });
+        renderAvailability(); renderRoute(); renderSummary();
+      }
+
+      function selectSlot(id) {
+        var index = state.selected.indexOf(id);
+        if (index >= 0) state.selected.splice(index, 1);
+        else if (state.selected.length < neededSessions()) state.selected.push(id);
+        else { showToast('Tu plan ya tiene todos sus horarios'); return; }
+        renderAvailability(); renderRoute(); renderSummary();
+      }
+
+      function renderGroups() {
+        var filtered = groups.filter(function (group) { return group.course === groupFilter.value; });
+        groupsGrid.innerHTML = '';
+        if (!filtered.length) {
+          groupsGrid.innerHTML = '<article class="card card-pad"><h2>Aún no hay grupos</h2><p class="helper">Puedes proponer el primer turno para este curso.</p></article>';
+          return;
+        }
+        filtered.forEach(function (group) {
+          var course = courses[group.course];
+          var slots = group.slots.map(function (id) { return course.slots.find(function (slot) { return slot.id === id; }); });
+          var card = document.createElement('article'); card.className = 'card group-card';
+          var people = '';
+          group.initials.forEach(function (initial) { people += '<span class="person">' + initial + '</span>'; });
+          for (var i = group.joined; i < 4; i += 1) people += '<span class="person empty">+</span>';
+          var sessions = slots.map(function (slot, index) { return '<div class="group-session"><span>Sesión ' + (index + 1) + '</span><b>' + slot.date + ' · ' + slot.time + '</b></div>'; }).join('');
+          var price = slots.reduce(function (sum, slot) { return sum + (slot.discount ? 25 : 28); }, 0);
+          card.innerHTML = '<div class="group-color"></div><div class="group-body"><div class="group-top"><div><div class="group-symbol">' + course.symbol + '</div><h2>' + course.name + '</h2><p class="helper">' + group.plan + ' · examen ' + course.exam + '</p></div><div class="group-price">' + money(price) + '<small>por persona</small></div></div><div class="group-sessions">' + sessions + '</div><div class="seat-row"><div style="display:flex;align-items:center"><div class="people">' + people + '</div><span class="seat-copy">' + group.joined + ' de 4 lugares</span></div><button class="btn btn-soft join-group" data-group="' + group.id + '">Unirme</button></div></div>';
+          groupsGrid.appendChild(card);
+        });
+      }
+
+      function joinGroup(id) {
+        var group = groups.find(function (item) { return item.id === id; });
+        state.course = group.course; state.plan = 'focus'; state.mode = 'group'; state.selected = group.slots.slice();
+        renderAll(); switchView('plan');
+        showToast('El grupo se cargó en tu plan');
+      }
+
+      function renderHeatmap() {
+        var days = ['Lun','Mar','Mié','Jue','Vie','Sáb'];
+        var hours = ['9 a. m.','2 p. m.','5 p. m.','7 p. m.'];
+        var key = tutorCourse.value || state.course;
+        var values = heatState[key];
+        var grid = document.getElementById('heatmap'); grid.innerHTML = '<span></span>';
+        days.forEach(function (day) { grid.innerHTML += '<span class="heat-day">' + day + '</span>'; });
+        hours.forEach(function (hour, hourIndex) {
+          grid.innerHTML += '<span class="heat-hour">' + hour + '</span>';
+          days.forEach(function (_, dayIndex) {
+            var index = hourIndex * 6 + dayIndex;
+            var cell = values[index];
+            grid.innerHTML += '<button class="heat-cell' + (cell.marked ? ' marked' : '') + (cell.peak ? ' peak' : '') + '" data-heat="' + index + '" aria-label="' + days[dayIndex] + ' ' + hour + '"></button>';
+          });
+        });
+        document.getElementById('heat-title').textContent = courses[key].name;
+        document.getElementById('marked-hours').textContent = values.filter(function (cell) { return cell.marked; }).length;
+      }
+
+      function openModal(title, copy, summary, actionText) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-copy').textContent = copy;
+        document.getElementById('modal-summary').innerHTML = summary;
+        document.getElementById('modal-action').textContent = actionText || 'Continuar';
+        modal.classList.add('open');
+      }
+
+      document.addEventListener('click', function (event) {
+        var viewButton = event.target.closest('[data-view]');
+        if (viewButton) { switchView(viewButton.dataset.view); return; }
+        var courseButton = event.target.closest('[data-course]');
+        if (courseButton) { state.course = courseButton.dataset.course; state.selected = []; renderAll(); return; }
+        var planButton = event.target.closest('[data-plan]');
+        if (planButton) {
+          state.plan = planButton.dataset.plan;
+          if (state.selected.length > neededSessions()) state.selected = state.selected.slice(0, neededSessions());
+          renderAll(); return;
+        }
+        var modeButton = event.target.closest('[data-mode]');
+        if (modeButton) { state.mode = modeButton.dataset.mode; renderAll(); return; }
+        var slotButton = event.target.closest('[data-slot]');
+        if (slotButton) { selectSlot(slotButton.dataset.slot); return; }
+        var joinButton = event.target.closest('[data-group]');
+        if (joinButton) { joinGroup(joinButton.dataset.group); return; }
+        var heatButton = event.target.closest('[data-heat]');
+        if (heatButton) {
+          var key = tutorCourse.value; var index = Number(heatButton.dataset.heat);
+          heatState[key][index].marked = !heatState[key][index].marked; renderHeatmap(); showToast('Disponibilidad actualizada'); return;
+        }
+      });
+
+      groupFilter.addEventListener('change', renderGroups);
+      tutorCourse.addEventListener('change', renderHeatmap);
+      document.getElementById('clear-route').addEventListener('click', function () { state.selected = []; renderAvailability(); renderRoute(); renderSummary(); });
+      document.getElementById('continue-payment').addEventListener('click', function () {
+        var slots = selectedSlots(); var total = slots.reduce(function (sum, slot) { return sum + slotPrice(slot); }, 0);
+        var sessionText = slots.map(function (slot, index) { return '<b>Sesión ' + (index + 1) + ':</b> ' + slot.date + ' · ' + slot.time; }).join('<br>');
+        openModal('Tu ruta está lista', 'Revisa las sesiones antes de continuar al pago.', sessionText + '<br><b>Total:</b> ' + money(total), 'Continuar al pago');
+      });
+      document.getElementById('propose-group').addEventListener('click', function () {
+        var course = courses[groupFilter.value];
+        openModal('Propón otro turno', 'Publicaremos un nuevo grupo cuando el horario tenga un tutor disponible.', '<b>Curso:</b> ' + course.name + '<br><b>Siguiente paso:</b> elegir dos horarios para el Plan Enfoque.', 'Elegir horarios');
+      });
+      document.getElementById('modal-close').addEventListener('click', function () { modal.classList.remove('open'); });
+      document.getElementById('modal-action').addEventListener('click', function () { modal.classList.remove('open'); showToast('Listo para el siguiente paso'); });
+      modal.addEventListener('click', function (event) { if (event.target === modal) modal.classList.remove('open'); });
+
+      renderAll(); renderGroups(); renderHeatmap();
+    }());
+  </script>
+</body>
+</html>

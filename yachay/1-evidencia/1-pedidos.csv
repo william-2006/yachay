@@ -1,0 +1,32 @@
+Datos ficticios creados para este caso.
+ID,Fecha,Curso,Fecha del examen,Días antes del examen,Canal,Personas,¿Había tutor libre?,¿Se dio la sesión?,Monto (S/)
+P-01,2030-10-01,Matemática I,2030-10-14,13,Instagram,1,Sí,Sí,40
+P-02,2030-10-03,Finanzas,2030-10-14,11,WhatsApp,2,Sí,Sí,56
+P-03,2030-10-04,Contabilidad,2030-10-19,15,WhatsApp,1,Sí,Sí,40
+P-04,2030-10-07,Matemática I,2030-10-19,12,Instagram,3,Sí,Sí,84
+P-05,2030-10-08,Estadística,2030-10-21,13,WhatsApp,1,Sí,Sí,40
+P-06,2030-10-09,Contabilidad,2030-10-22,13,Instagram,1,Sí,Sí,40
+P-07,2030-10-10,Microeconomía,2030-10-23,13,Instagram,1,Sí,Sí,40
+P-08,2030-10-14,Finanzas,2030-10-19,5,WhatsApp,1,Sí,Sí,40
+P-09,2030-10-15,Matemática I,2030-10-21,6,Instagram,2,Sí,Sí,56
+P-10,2030-10-16,Contabilidad,2030-10-21,5,Instagram,1,No,No,0
+P-11,2030-10-16,Matemática I,2030-10-19,3,Instagram,1,No,No,0
+P-12,2030-10-17,Estadística,2030-10-22,5,WhatsApp,1,Sí,Sí,40
+P-13,2030-10-17,Estadística,2030-10-19,2,WhatsApp,2,No,No,0
+P-14,2030-10-18,Microeconomía,2030-10-24,6,WhatsApp,1,Sí,Sí,40
+P-15,2030-10-18,Finanzas,2030-10-21,3,WhatsApp,1,Sí,Sí,40
+P-16,2030-10-18,Contabilidad,2030-10-21,3,Instagram,2,No,No,0
+P-17,2030-10-18,Matemática I,2030-10-21,3,Instagram,1,No,No,0
+P-18,2030-10-19,Microeconomía,2030-10-21,2,WhatsApp,4,No,No,0
+P-19,2030-10-20,Contabilidad,2030-10-23,3,WhatsApp,3,Sí,Sí,84
+P-20,2030-10-20,Estadística,2030-10-21,1,Instagram,1,No,No,0
+P-21,2030-10-21,Matemática I,2030-10-24,3,WhatsApp,1,Sí,Sí,40
+P-22,2030-10-21,Finanzas,2030-10-23,2,Instagram,1,No,No,0
+P-23,2030-10-22,Estadística,2030-10-24,2,WhatsApp,2,No,No,0
+P-24,2030-10-22,Microeconomía,2030-10-24,2,Instagram,1,No,No,0
+P-25,2030-10-23,Contabilidad,2030-10-24,1,Instagram,1,Sí,Sí,40
+P-26,2030-10-23,Finanzas,2030-10-24,1,WhatsApp,1,No,No,0
+P-27,2030-10-26,Matemática I,2030-10-29,3,Instagram,1,Sí,Sí,40
+P-28,2030-10-27,Microeconomía,2030-10-29,2,WhatsApp,1,No,No,0
+P-29,2030-10-29,Estadística,2030-10-31,2,Instagram,1,Sí,Sí,40
+P-30,2030-10-30,Contabilidad,2030-11-01,2,WhatsApp,1,Sí,Sí,40

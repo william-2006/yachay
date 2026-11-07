@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "yachay/4-salidas",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/wireframe.html"
+      }
+    ]
+  }
+}
